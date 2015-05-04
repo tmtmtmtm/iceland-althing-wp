@@ -39,6 +39,8 @@ end
       constituency: tds[2].text.gsub(/[[:space:]]/, ' ').strip,
       source: url,
       term: term,
+      start_date: nil,
+      end_date: nil,
     }
     data[:wikipedia].prepend @WIKI unless data[:wikipedia].empty?
 
