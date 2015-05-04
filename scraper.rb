@@ -29,6 +29,21 @@ end
     [ '#'+ note.css('@id').text, note ]
   }]
 
+  # pre-load a Party Change table
+  switches = Hash[
+    page.xpath('//table[.//th[text()[contains(.,"New party")]]]/tr[td]').map { |row|
+      tds = row.css('td')
+      date = tds[1].text.strip
+      date = Date.parse(tds[1].text).iso8601 if date.length > 4
+      [
+        tds[0].text.strip, {
+          start_date: date,
+          party: tds[3].text,
+        }
+      ]
+    }
+  ]
+
   # Find a table with a 'Constituency' column
   table = page.at_xpath('//table[.//th[text()[contains(.,"Constituency")]]]')
   table.xpath('tr[td]').each do |member|
@@ -45,7 +60,13 @@ end
     }
     data[:wikipedia].prepend @WIKI unless data[:wikipedia].empty?
 
-    # If no references, then we're done. Otherwise ...
+    # If we had a record in the "Changes" table:
+    if switch = switches[data[:name]]
+      replacement = data.merge(switch)
+      data[:end_date] = switch[:start_date]
+    end
+
+    # If there are any reference notes on the Membership:
     if not (ref = tds[0].css('sup.reference a @href').text).empty?
       note = notes[ref].css('span.reference-text')
       # puts "#{ref} = #{note}".magenta 
