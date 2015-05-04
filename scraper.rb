@@ -2,11 +2,12 @@
 require 'scraperwiki'
 require 'nokogiri'
 require 'date'
+require 'open-uri'
 
-require 'open-uri/cached'
-require 'colorize'
-require 'pry'
-require 'csv'
+# require 'open-uri/cached'
+# require 'colorize'
+# require 'pry'
+# require 'csv'
 
 def noko(url)
   Nokogiri::HTML(open(url).read) 
@@ -32,7 +33,9 @@ def wikilink(a)
   @WIKI + a['href']
 end
 
-# Historic
+# -------
+# Current
+# -------
 
 if current = noko('http://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland')
   table = current.xpath('//table[./caption[text()[contains(.,"Members")]]]')
@@ -49,8 +52,7 @@ if current = noko('http://en.wikipedia.org/wiki/List_of_members_of_the_parliamen
         start_date: nil,
         end_date: nil,
       }
-      puts data.values.to_csv
-      # ScraperWiki.save_sqlite([:name], data)
+      ScraperWiki.save_sqlite([:name], data)
     end
   end
 
@@ -58,7 +60,9 @@ else
   raise "No current"
 end
 
+# --------
 # Historic
+# --------
 
 @oldterms = {
   '1995–1999' => "List_of_members_of_the_parliament_of_Iceland,_1995%E2%80%9399",
@@ -117,7 +121,6 @@ end
     # If there are any reference notes on the Membership:
     if not (ref = tds[0].css('sup.reference a @href').text).empty?
       note = notes[ref].css('span.reference-text')
-      # puts "#{ref} = #{note}".magenta 
 
       # Replaced by someone else
       if replaced = note.children.each_slice(3).find { |t,_,_| t.text.include? 'Replaced by' }
@@ -162,10 +165,8 @@ end
       end
     end
 
-    puts data.values.to_csv
-    # ScraperWiki.save_sqlite([:name], data)
-    puts replacement.values.to_csv if replacement
-    # ScraperWiki.save_sqlite([:name], replacement) if replacement
+    ScraperWiki.save_sqlite([:name], data)
+    ScraperWiki.save_sqlite([:name], replacement) if replacement
   end
 end
 
