@@ -92,7 +92,7 @@ end
       [
         tds[0].text.strip, {
           start_date: date,
-          party: tds[3].text,
+          party: tds[3].text.split('[').first,
         }
       ]
     }
