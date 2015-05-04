@@ -123,7 +123,7 @@ end
       if replaced = note.children.each_slice(3).find { |t,_,_| t.text.include? 'Replaced by' }
         replacement = data.merge({ 
           name: replaced[1].text.strip,
-          wikipedia: (replaced[1].attr('class') == 'new' ? '' : replaced[1]['href'])
+          wikipedia: wikilink(replaced[1]),
         })
 
         if change_date = note.text[/on (\d+ \w+ \d+)/, 1]
