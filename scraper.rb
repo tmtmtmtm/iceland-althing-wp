@@ -50,7 +50,7 @@ if current = noko('http://en.wikipedia.org/wiki/List_of_members_of_the_parliamen
         wikipedia: wikilink(p),
         constituency: constituencies[i],
         party: party_from(p.xpath('./following-sibling::text()').first.text),
-        term: '2013–',
+        term: '2013',
         start_date: nil,
         end_date: nil,
       }
@@ -67,14 +67,15 @@ end
 # --------
 
 @oldterms = {
-  '1995–1999' => "List_of_members_of_the_parliament_of_Iceland,_1995%E2%80%9399",
-  '1999–2003' => "List_of_members_of_the_parliament_of_Iceland,_1999%E2%80%932003",
-  '2003–2007' => "List_of_members_of_the_parliament_of_Iceland,_2003%E2%80%9307",
-  '2007–2009' => "List_of_members_of_the_parliament_of_Iceland,_2007%E2%80%9309",
-  '2009–2013' => "List_of_members_of_the_parliament_of_Iceland,_2009%E2%80%9313",
+  '1995' => "List_of_members_of_the_parliament_of_Iceland,_1995%E2%80%9399",
+  '1999' => "List_of_members_of_the_parliament_of_Iceland,_1999%E2%80%932003",
+  '2003' => "List_of_members_of_the_parliament_of_Iceland,_2003%E2%80%9307",
+  '2007' => "List_of_members_of_the_parliament_of_Iceland,_2007%E2%80%9309",
+  '2009' => "List_of_members_of_the_parliament_of_Iceland,_2009%E2%80%9313",
 }
 
 @oldterms.each do |term, pagename|
+  puts "Fetching #{term}"
   url = "#{@WIKI}/wiki/#{pagename}"
   page = noko(url)
 
