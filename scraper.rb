@@ -1,9 +1,10 @@
 
 require 'scraperwiki'
-require 'open-uri/cached'
 require 'nokogiri'
-require 'colorize'
+require 'date'
 
+require 'open-uri/cached'
+require 'colorize'
 require 'pry'
 
 def noko(url)
@@ -15,6 +16,7 @@ end
   '1995–1999' => "List_of_members_of_the_parliament_of_Iceland,_1995%E2%80%9399",
   '1999–2003' => "List_of_members_of_the_parliament_of_Iceland,_1999%E2%80%932003",
   '2003–2007' => "List_of_members_of_the_parliament_of_Iceland,_2003%E2%80%9307",
+  '2007–2009' => "List_of_members_of_the_parliament_of_Iceland,_2007%E2%80%9309",
 }
 
 @terms.each do |term, pagename|
@@ -52,7 +54,10 @@ end
           wikipedia: (replaced[1].attr('class') == 'new' ? '' : replaced[1]['href'])
         })
 
-        if change_year = replaced[2].text[/in (\d{4})/, 1]
+        if change_date = replaced[2].text[/on (\d+ \w+ \d+)/, 1]
+          pdate = Date.parse(change_date) or raise "Can't parse #{pdate}"
+          replacement[:start_date] = data[:end_date] = pdate.iso8601
+        elsif change_year = replaced[2].text[/in (\d{4})/, 1]
           replacement[:start_date] = data[:end_date] = change_year
         else 
           raise "Can't parse dates in #{note}"
@@ -79,7 +84,6 @@ end
           else 
             raise "Can't parse dates in #{note}"
           end
-          puts "#{replacement}".green
         end
       else
         raise "odd note: #{notes[ref].text}".red
