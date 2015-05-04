@@ -25,7 +25,7 @@ end
 }
 
 def party_from(text)
-  abbrev = @parties[ text[/\((\w+)\)/,1] ]
+  abbrev = @parties[ text[/\(([[:alpha:]]+)\)/,1] ] or raise "No party for #{$1}"
 end
 
 @WIKI = 'http://en.wikipedia.org'
