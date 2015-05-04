@@ -6,13 +6,61 @@ require 'date'
 require 'open-uri/cached'
 require 'colorize'
 require 'pry'
+require 'csv'
 
 def noko(url)
   Nokogiri::HTML(open(url).read) 
 end
 
+@parties = {
+  'D' => 'Independence Party',
+  'B' => 'Progressive Party',
+  'S' => 'Social Democratic Alliance',
+  'V' => 'Left-Green Movement',
+  'A' => 'Bright Future',
+  'Þ' => 'Pirate Party',
+}
+
+def party_from(text)
+  abbrev = @parties[ text[/\((\w+)\)/,1] ]
+end
+
 @WIKI = 'http://en.wikipedia.org'
-@terms = {
+
+def wikilink(a)
+  return if a.attr('class') == 'new' 
+  @WIKI + a['href']
+end
+
+# Historic
+
+if current = noko('http://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland')
+  table = current.xpath('//table[./caption[text()[contains(.,"Members")]]]')
+  constituencies = table.xpath('tr[th]/th').map(&:text)
+
+  table.xpath('tr[td]').first.xpath('td').each_with_index do |td, i|
+    td.xpath('.//a').each do |p|
+      data = {
+        name: p.text.strip,
+        wikipedia: wikilink(p),
+        constituency: constituencies[i],
+        party: party_from(p.xpath('./following-sibling::text()').first.text),
+        term: '2013–',
+        start_date: nil,
+        end_date: nil,
+      }
+      puts data.values.to_csv
+      # ScraperWiki.save_sqlite([:name], data)
+    end
+  end
+
+else 
+  raise "No current"
+end
+
+# Historic
+
+@oldterms = {
   '1995–1999' => "List_of_members_of_the_parliament_of_Iceland,_1995%E2%80%9399",
   '1999–2003' => "List_of_members_of_the_parliament_of_Iceland,_1999%E2%80%932003",
   '2003–2007' => "List_of_members_of_the_parliament_of_Iceland,_2003%E2%80%9307",
@@ -20,7 +68,7 @@ end
   '2009–2013' => "List_of_members_of_the_parliament_of_Iceland,_2009%E2%80%9313",
 }
 
-@terms.each do |term, pagename|
+@oldterms.each do |term, pagename|
   url = "#{@WIKI}/wiki/#{pagename}"
   page = noko(url)
 
@@ -114,7 +162,6 @@ end
       end
     end
 
-    require 'csv'
     puts data.values.to_csv
     # ScraperWiki.save_sqlite([:name], data)
     puts replacement.values.to_csv if replacement
@@ -122,4 +169,3 @@ end
   end
 end
 
-__END__
