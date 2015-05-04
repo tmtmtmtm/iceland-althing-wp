@@ -12,11 +12,13 @@ end
 
 @WIKI = 'http://en.wikipedia.org'
 @terms = {
-  '1995–1999' => "#{@WIKI}/wiki/List_of_members_of_the_parliament_of_Iceland,_1995%E2%80%9399",
-  '1999–2003' => "#{@WIKI}/wiki/List_of_members_of_the_parliament_of_Iceland,_1999%E2%80%932003",
+  '1995–1999' => "List_of_members_of_the_parliament_of_Iceland,_1995%E2%80%9399",
+  '1999–2003' => "List_of_members_of_the_parliament_of_Iceland,_1999%E2%80%932003",
+  '2003–2007' => "List_of_members_of_the_parliament_of_Iceland,_2003%E2%80%9307",
 }
 
-@terms.each do |term, url|
+@terms.each do |term, pagename|
+  url = "#{@WIKI}/wiki/#{pagename}"
   page = noko(url)
 
   # pre-load the Reference List
@@ -62,10 +64,10 @@ end
           # Ignore this for now
         elsif switch[0].text.include? 'Became independent'
           new_party = 'Independent'
-          change_date_str = switch[0]
-        elsif switch[0].text.include? 'Became member of'
+          change_date_str = switch[0].text
+        elsif switch[0].text.include? 'member of'
           new_party = switch[1].text
-          change_date_str = switch[2]
+          change_date_str = switch[2].text
         else
           raise "Became what? #{notes[ref].text}".red
         end
