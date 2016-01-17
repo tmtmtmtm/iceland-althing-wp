@@ -52,7 +52,7 @@ if current = noko('https://en.wikipedia.org/wiki/List_of_members_of_the_parliame
         end_date: nil,
       }
       count += 1
-      ScraperWiki.save_sqlite([:name], data)
+      ScraperWiki.save_sqlite([:name, :term], data)
     end
   end
   puts "Current: #{count}"
@@ -167,8 +167,8 @@ end
     end
 
     count += 1
-    ScraperWiki.save_sqlite([:name], data)
-    (ScraperWiki.save_sqlite([:name], replacement) && count+=1) if replacement
+    ScraperWiki.save_sqlite([:name, :term], data)
+    (ScraperWiki.save_sqlite([:name, :term], replacement) && count+=1) if replacement
   end
   puts "#{term}: #{count}"
 end
