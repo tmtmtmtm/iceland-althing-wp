@@ -5,11 +5,7 @@ require 'scraperwiki'
 require 'nokogiri'
 require 'date'
 require 'open-uri'
-
-# require 'open-uri/cached'
-# require 'colorize'
 # require 'pry'
-# require 'csv'
 
 def noko(url)
   Nokogiri::HTML(open(url).read) 
@@ -28,21 +24,22 @@ def party_from(text)
   abbrev = @parties[ text[/\(([[:alpha:]]+)\)/,1] ] or raise "No party for #{$1}"
 end
 
-@WIKI = 'http://en.wikipedia.org'
+@WIKI = 'https://en.wikipedia.org'
 
 def wikilink(a)
   return if a.attr('class') == 'new' 
-  @WIKI + a['href']
+  a['title']
 end
 
 # -------
 # Current
 # -------
 
-if current = noko('http://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland')
+if current = noko('https://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland')
   table = current.xpath('//table[./caption[text()[contains(.,"Members")]]]')
   constituencies = table.xpath('tr[th]/th').map(&:text)
 
+  count = 0
   table.xpath('tr[td]').first.xpath('td').each_with_index do |td, i|
     td.xpath('.//a').each do |p|
       data = {
@@ -54,9 +51,11 @@ if current = noko('http://en.wikipedia.org/wiki/List_of_members_of_the_parliamen
         start_date: nil,
         end_date: nil,
       }
+      count += 1
       ScraperWiki.save_sqlite([:name], data)
     end
   end
+  puts "Current: #{count}"
 
 else 
   raise "No current"
@@ -74,10 +73,10 @@ end
   '2009' => "List_of_members_of_the_parliament_of_Iceland,_2009%E2%80%9313",
 }
 
-@oldterms.each do |term, pagename|
-  puts "Fetching #{term}"
+@oldterms.reverse_each do |term, pagename|
   url = "#{@WIKI}/wiki/#{pagename}"
   page = noko(url)
+  count = 0
 
   # pre-load the Reference List
   notes = Hash[ page.css('.reflist .references li').map { |note|
@@ -105,7 +104,7 @@ end
     tds = member.xpath('td')
     data = { 
       name: tds[0].css('a').first.text.strip,
-      wikipedia: tds[0].xpath('a[not(@class="new")]/@href').text.strip,
+      wikipedia: tds[0].xpath('a[not(@class="new")]/@title').text.strip,
       party: tds[1].xpath('a').text.strip,
       constituency: tds[2].text.gsub(/[[:space:]]/, ' ').strip,
       source: url,
@@ -113,7 +112,6 @@ end
       start_date: nil,
       end_date: nil,
     }
-    data[:wikipedia].prepend @WIKI unless data[:wikipedia].empty?
 
     # If we had a record in the "Changes" table:
     if switch = switches[data[:name]]
@@ -168,8 +166,10 @@ end
       end
     end
 
+    count += 1
     ScraperWiki.save_sqlite([:name], data)
-    ScraperWiki.save_sqlite([:name], replacement) if replacement
+    (ScraperWiki.save_sqlite([:name], replacement) && count+=1) if replacement
   end
+  puts "#{term}: #{count}"
 end
 
