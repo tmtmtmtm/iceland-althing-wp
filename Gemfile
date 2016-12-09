@@ -3,6 +3,7 @@
 # Find out more: https://morph.io/documentation/ruby
 
 source 'https://rubygems.org'
+git_source(:github) { |repo_name| "https://github.com/#{repo_name}.git" }
 
 ruby '2.0.0'
 
