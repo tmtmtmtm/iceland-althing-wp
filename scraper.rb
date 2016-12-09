@@ -4,8 +4,9 @@
 require 'scraperwiki'
 require 'nokogiri'
 require 'date'
-require 'open-uri'
+# require 'open-uri'
 # require 'pry'
+require 'scraped_page_archive/open-uri'
 
 def noko(url)
   Nokogiri::HTML(open(url).read) 
