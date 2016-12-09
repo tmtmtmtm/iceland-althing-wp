@@ -1,0 +1,74 @@
+---
+request:
+  method: get
+  uri: https://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland,_2003%E2%80%9307
+  body:
+    encoding: US-ASCII
+    string: ''
+  headers:
+    Accept-Encoding:
+    - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+    Accept:
+    - '*/*'
+    User-Agent:
+    - Ruby
+response:
+  status:
+    code: 200
+    message: OK
+  headers:
+    Date:
+    - Fri, 09 Dec 2016 17:32:59 GMT
+    Content-Type:
+    - text/html; charset=UTF-8
+    Transfer-Encoding:
+    - chunked
+    Connection:
+    - keep-alive
+    Server:
+    - mw1273.eqiad.wmnet
+    X-Powered-By:
+    - HHVM/3.12.7
+    Vary:
+    - Accept-Encoding,Cookie,Authorization
+    X-Ua-Compatible:
+    - IE=Edge
+    Content-Language:
+    - en
+    P3p:
+    - CP="This is not a P3P policy! See https://en.wikipedia.org/wiki/Special:CentralAutoLogin/P3P
+      for more info."
+    X-Content-Type-Options:
+    - nosniff
+    Last-Modified:
+    - Tue, 06 Dec 2016 13:48:17 GMT
+    Backend-Timing:
+    - D=63688 t=1481304779266974
+    X-Varnish:
+    - 106434775, 40857817, 237287541
+    Via:
+    - 1.1 varnish-v4, 1.1 varnish-v4, 1.1 varnish-v4
+    Accept-Ranges:
+    - bytes
+    Age:
+    - '0'
+    X-Cache:
+    - cp1053 miss, cp3043 miss, cp3030 miss
+    X-Cache-Status:
+    - miss
+    Strict-Transport-Security:
+    - max-age=31536000; includeSubDomains; preload
+    Set-Cookie:
+    - GeoIP=GB:ENG:Bristol:51.45:-2.58:v4; Path=/; secure; Domain=.wikipedia.org
+    - WMF-Last-Access=09-Dec-2016;Path=/;HttpOnly;secure;Expires=Tue, 10 Jan 2017
+      12:00:00 GMT
+    X-Analytics:
+    - ns=0;page_id=34220868;https=1;nocookies=1
+    X-Client-Ip:
+    - 5.148.47.8
+    Cache-Control:
+    - private, s-maxage=0, max-age=0, must-revalidate
+  body:
+    encoding: ASCII-8BIT
+  http_version: 
+recorded_at: Fri, 09 Dec 2016 17:32:59 GMT
