@@ -5,7 +5,7 @@ require 'scraperwiki'
 require 'nokogiri'
 require 'date'
 require 'open-uri'
-# require 'pry'
+require 'pry'
 
 def noko(url)
   Nokogiri::HTML(open(url).read) 
@@ -150,7 +150,7 @@ end
           new_party = switch[1].text
           change_date_str = switch[2].text
         else
-          raise "Became what? #{notes[ref].text}".red
+          raise "Became what? #{notes[ref].text}"
         end
 
         if new_party
@@ -162,7 +162,7 @@ end
           end
         end
       else
-        warn "odd note: #{notes[ref].text}".red
+        warn "odd note: #{notes[ref].text}"
       end
     end
 
