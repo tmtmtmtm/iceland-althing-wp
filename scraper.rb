@@ -39,6 +39,7 @@ end
 
 @WIKI = 'https://en.wikipedia.org'
 
+# TODO move this into a shared base class
 def wikilink(a)
   return if a.attr('class') == 'new'
   a['title']
@@ -95,6 +96,7 @@ end
 # ----------
 # Old layout
 # ----------
+# TODO: move these to Scraped
 
 @oldterms = {
   '1995' => "List_of_members_of_the_parliament_of_Iceland,_1995%E2%80%9399",
