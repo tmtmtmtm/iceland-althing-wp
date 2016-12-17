@@ -53,7 +53,7 @@ class MembersPageWithAreaTable < Scraped::HTML
           wikipedia: wikilink(p),
           constituency: constituencies[i],
           party: Party.new(p.xpath('./following-sibling::text()').first.text).name,
-          term: '2013',
+          term: nil, # splice in later
           start_date: nil,
           end_date: nil,
         }
@@ -79,8 +79,8 @@ end
 
 url = 'https://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland,_2013%E2%80%9316'
 page = MembersPageWithAreaTable.new(response: Scraped::Request.new(url: url).response)
-members = page.members
 # puts members
+members = page.members.each { |m| m[:term] = '2013' }
 puts "Current: #{members.count}"
 ScraperWiki.save_sqlite([:name, :term], members)
 
