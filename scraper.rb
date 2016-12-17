@@ -8,7 +8,7 @@ require 'open-uri'
 require 'pry'
 
 def noko(url)
-  Nokogiri::HTML(open(url).read) 
+  Nokogiri::HTML(open(url).read)
 end
 
 @parties = {
@@ -29,7 +29,7 @@ end
 @WIKI = 'https://en.wikipedia.org'
 
 def wikilink(a)
-  return if a.attr('class') == 'new' 
+  return if a.attr('class') == 'new'
   a['title']
 end
 
@@ -54,12 +54,13 @@ if current = noko('https://en.wikipedia.org/wiki/List_of_members_of_the_parliame
         end_date: nil,
       }
       count += 1
+      warn data
       ScraperWiki.save_sqlite([:name, :term], data)
     end
   end
   puts "Current: #{count}"
 
-else 
+else
   raise "No current"
 end
 
@@ -104,7 +105,7 @@ end
   table = page.at_xpath('//table[.//th[text()[contains(.,"Constituency")]]]')
   table.xpath('tr[td]').each do |member|
     tds = member.xpath('td')
-    data = { 
+    data = {
       name: tds[0].css('a').first.text.strip,
       wikipedia: tds[0].xpath('a[not(@class="new")]/@title').text.strip,
       party: tds[1].xpath('a').text.strip,
@@ -127,7 +128,7 @@ end
 
       # Replaced by someone else
       if replaced = note.children.each_slice(3).find { |t,_,_| t.text.include? 'Replaced by' }
-        replacement = data.merge({ 
+        replacement = data.merge({
           name: replaced[1].text.strip,
           wikipedia: wikilink(replaced[1]),
         })
@@ -137,10 +138,10 @@ end
           replacement[:start_date] = data[:end_date] = pdate.iso8601
         elsif change_year = note.text[/in (\d{4})/, 1]
           replacement[:start_date] = data[:end_date] = change_year
-        else 
+        else
           raise "Can't parse dates in #{note}"
         end
-        
+
       # Changed party
       elsif switch = note.children.each_slice(3).find { |t,_,_| t.text.include? 'Became' }
         if note.text.include? 'Became Prime Minister'
@@ -159,7 +160,7 @@ end
           replacement = data.merge({ party: new_party })
           if change_year = change_date_str[/in (\d{4})/, 1]
             replacement[:start_date] = data[:end_date] = change_year
-          else 
+          else
             raise "Can't parse dates in #{note}"
           end
         end
