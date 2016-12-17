@@ -46,9 +46,6 @@ end
 
 class MembersPageWithAreaTable < Scraped::HTML
   field :members do
-    table = noko.xpath('//table[./caption[text()[contains(.,"Members")]]]')
-    constituencies = table.xpath('tr[th]/th').map(&:text)
-
     table.xpath('tr[td]').first.xpath('td').each_with_index.map do |td, i|
       td.xpath('.//a').map do |p|
         {
@@ -62,6 +59,16 @@ class MembersPageWithAreaTable < Scraped::HTML
         }
       end
     end.flatten
+  end
+
+  private
+
+  def table
+    noko.xpath('//table[./caption[text()[contains(.,"Members")]]]')
+  end
+
+  def constituencies
+    @cons ||= table.xpath('tr[th]/th').map(&:text)
   end
 end
 
