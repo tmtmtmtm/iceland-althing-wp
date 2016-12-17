@@ -77,12 +77,17 @@ end
 # -------
 # https://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland
 
-url = 'https://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland,_2013%E2%80%9316'
-page = MembersPageWithAreaTable.new(response: Scraped::Request.new(url: url).response)
-# puts members
-members = page.members.each { |m| m[:term] = '2013' }
-puts "Current: #{members.count}"
-ScraperWiki.save_sqlite([:name, :term], members)
+new_format_terms = {
+  '2013' => 'https://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland,_2013%E2%80%9316',
+}
+
+new_format_terms.each do |term, url|
+  page = MembersPageWithAreaTable.new(response: Scraped::Request.new(url: url).response)
+  members = page.members.each { |m| m[:term] = term }
+  # puts members
+  puts "#{term}: #{members.count}"
+  ScraperWiki.save_sqlite([:name, :term], members)
+end
 
 # --------
 # Historic
