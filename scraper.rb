@@ -72,6 +72,9 @@ class MembersPageWithAreaTable < Scraped::HTML
   end
 end
 
+# Clean out old data and start fresh each time
+ScraperWiki.sqliteexecute('DELETE FROM data') rescue nil
+
 # ----------
 # New layout
 # ----------
