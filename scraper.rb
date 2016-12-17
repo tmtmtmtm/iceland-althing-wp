@@ -36,8 +36,8 @@ end
 # -------
 # Current
 # -------
-
-if current = noko('https://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland')
+# https://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland
+if current = noko('https://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland,_2013%E2%80%9316')
   table = current.xpath('//table[./caption[text()[contains(.,"Members")]]]')
   constituencies = table.xpath('tr[th]/th').map(&:text)
 
