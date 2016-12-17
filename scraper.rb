@@ -17,7 +17,9 @@ end
   'S' => 'Social Democratic Alliance',
   'V' => 'Left-Green Movement',
   'A' => 'Bright Future',
+  'P' => 'Pirate Party',
   'Þ' => 'Pirate Party',
+  'C' => 'Reform Party',
 }
 
 def party_from(text)
