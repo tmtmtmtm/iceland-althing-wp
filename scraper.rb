@@ -72,12 +72,12 @@ class MembersPageWithAreaTable < Scraped::HTML
   end
 end
 
-# -------
-# Current
-# -------
-# https://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland
+# ----------
+# New layout
+# ----------
 
 new_format_terms = {
+  '2016' => 'https://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland',
   '2013' => 'https://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland,_2013%E2%80%9316',
 }
 
@@ -89,9 +89,9 @@ new_format_terms.each do |term, url|
   ScraperWiki.save_sqlite([:name, :term], members)
 end
 
-# --------
-# Historic
-# --------
+# ----------
+# Old layout
+# ----------
 
 @oldterms = {
   '1995' => "List_of_members_of_the_parliament_of_Iceland,_1995%E2%80%9399",
