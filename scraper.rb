@@ -1,29 +1,40 @@
 #!/bin/env ruby
 # encoding: utf-8
 
-require 'scraperwiki'
-require 'nokogiri'
 require 'date'
+require 'nokogiri'
 require 'open-uri'
 require 'pry'
+require 'scraped'
+require 'scraperwiki'
 
 def noko(url)
   Nokogiri::HTML(open(url).read)
 end
 
-@parties = {
-  'D' => 'Independence Party',
-  'B' => 'Progressive Party',
-  'S' => 'Social Democratic Alliance',
-  'V' => 'Left-Green Movement',
-  'A' => 'Bright Future',
-  'P' => 'Pirate Party',
-  'Þ' => 'Pirate Party',
-  'C' => 'Reform Party',
-}
+class Party
+  PARTIES = {
+    'D' => 'Independence Party',
+    'B' => 'Progressive Party',
+    'S' => 'Social Democratic Alliance',
+    'V' => 'Left-Green Movement',
+    'A' => 'Bright Future',
+    'P' => 'Pirate Party',
+    'Þ' => 'Pirate Party',
+    'C' => 'Reform Party',
+  }
 
-def party_from(text)
-  abbrev = @parties[ text[/\(([[:alpha:]]+)\)/,1] ] or raise "No party for #{$1}"
+  def initialize(id)
+    @id = id
+  end
+
+  def name
+    PARTIES[ id[/\(([[:alpha:]]+)\)/,1] ] or raise "No party for #{$1}"
+  end
+
+  private
+
+  attr_reader :id
 end
 
 @WIKI = 'https://en.wikipedia.org'
@@ -33,36 +44,38 @@ def wikilink(a)
   a['title']
 end
 
+class MembersPageWithAreaTable < Scraped::HTML
+  field :members do
+    table = noko.xpath('//table[./caption[text()[contains(.,"Members")]]]')
+    constituencies = table.xpath('tr[th]/th').map(&:text)
+
+    table.xpath('tr[td]').first.xpath('td').each_with_index.map do |td, i|
+      td.xpath('.//a').map do |p|
+        {
+          name: p.text.strip,
+          wikipedia: wikilink(p),
+          constituency: constituencies[i],
+          party: Party.new(p.xpath('./following-sibling::text()').first.text).name,
+          term: '2013',
+          start_date: nil,
+          end_date: nil,
+        }
+      end
+    end.flatten
+  end
+end
+
 # -------
 # Current
 # -------
 # https://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland
-if current = noko('https://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland,_2013%E2%80%9316')
-  table = current.xpath('//table[./caption[text()[contains(.,"Members")]]]')
-  constituencies = table.xpath('tr[th]/th').map(&:text)
 
-  count = 0
-  table.xpath('tr[td]').first.xpath('td').each_with_index do |td, i|
-    td.xpath('.//a').each do |p|
-      data = {
-        name: p.text.strip,
-        wikipedia: wikilink(p),
-        constituency: constituencies[i],
-        party: party_from(p.xpath('./following-sibling::text()').first.text),
-        term: '2013',
-        start_date: nil,
-        end_date: nil,
-      }
-      count += 1
-      warn data
-      ScraperWiki.save_sqlite([:name, :term], data)
-    end
-  end
-  puts "Current: #{count}"
-
-else
-  raise "No current"
-end
+url = 'https://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland,_2013%E2%80%9316'
+page = MembersPageWithAreaTable.new(response: Scraped::Request.new(url: url).response)
+members = page.members
+# puts members
+puts "Current: #{members.count}"
+ScraperWiki.save_sqlite([:name, :term], members)
 
 # --------
 # Historic
