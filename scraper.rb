@@ -1,5 +1,6 @@
 #!/bin/env ruby
 # encoding: utf-8
+# frozen_string_literal: true
 
 require 'date'
 require 'nokogiri'
@@ -22,14 +23,14 @@ class Party
     'P' => 'Pirate Party',
     'Þ' => 'Pirate Party',
     'C' => 'Reform Party',
-  }
+  }.freeze
 
   def initialize(id)
     @id = id
   end
 
   def name
-    PARTIES[ id[/\(([[:alpha:]]+)\)/,1] ] or raise "No party for #{$1}"
+    PARTIES[id[/\(([[:alpha:]]+)\)/, 1]] or raise "No party for #{Regexp.last_match(1)}"
   end
 
   private
@@ -39,7 +40,7 @@ end
 
 @WIKI = 'https://en.wikipedia.org'
 
-# TODO move this into a shared base class
+# TODO: move this into a shared base class
 def wikilink(a)
   return if a.attr('class') == 'new'
   a['title']
@@ -50,13 +51,13 @@ class MembersPageWithAreaTable < Scraped::HTML
     table.xpath('tr[td]').first.xpath('td').each_with_index.map do |td, i|
       td.xpath('.//a').map do |p|
         {
-          name: p.text.strip,
-          wikipedia: wikilink(p),
+          name:         p.text.strip,
+          wikipedia:    wikilink(p),
           constituency: constituencies[i],
-          party: Party.new(p.xpath('./following-sibling::text()').first.text).name,
-          term: nil, # splice in later
-          start_date: nil,
-          end_date: nil,
+          party:        Party.new(p.xpath('./following-sibling::text()').first.text).name,
+          term:         nil, # splice in later
+          start_date:   nil,
+          end_date:     nil,
         }
       end
     end.flatten
@@ -90,7 +91,7 @@ new_format_terms.each do |term, url|
   members = page.members.each { |m| m[:term] = term }
   # puts members
   puts "#{term}: #{members.count}"
-  ScraperWiki.save_sqlite([:name, :term], members)
+  ScraperWiki.save_sqlite(%i(name term), members)
 end
 
 # ----------
@@ -99,11 +100,11 @@ end
 # TODO: move these to Scraped
 
 @oldterms = {
-  '1995' => "List_of_members_of_the_parliament_of_Iceland,_1995%E2%80%9399",
-  '1999' => "List_of_members_of_the_parliament_of_Iceland,_1999%E2%80%932003",
-  '2003' => "List_of_members_of_the_parliament_of_Iceland,_2003%E2%80%9307",
-  '2007' => "List_of_members_of_the_parliament_of_Iceland,_2007%E2%80%9309",
-  '2009' => "List_of_members_of_the_parliament_of_Iceland,_2009%E2%80%9313",
+  '1995' => 'List_of_members_of_the_parliament_of_Iceland,_1995%E2%80%9399',
+  '1999' => 'List_of_members_of_the_parliament_of_Iceland,_1999%E2%80%932003',
+  '2003' => 'List_of_members_of_the_parliament_of_Iceland,_2003%E2%80%9307',
+  '2007' => 'List_of_members_of_the_parliament_of_Iceland,_2007%E2%80%9309',
+  '2009' => 'List_of_members_of_the_parliament_of_Iceland,_2009%E2%80%9313',
 }
 
 @oldterms.reverse_each do |term, pagename|
@@ -112,23 +113,23 @@ end
   count = 0
 
   # pre-load the Reference List
-  notes = Hash[ page.css('.reflist .references li').map { |note|
-    [ '#'+ note.css('@id').text, note ]
-  }]
+  notes = Hash[page.css('.reflist .references li').map do |note|
+    ['#' + note.css('@id').text, note]
+  end]
 
   # pre-load a Party Change table
   switches = Hash[
-    page.xpath('//table[.//th[text()[contains(.,"New party")]]]/tr[td]').map { |row|
+    page.xpath('//table[.//th[text()[contains(.,"New party")]]]/tr[td]').map do |row|
       tds = row.css('td')
       date = tds[1].text.strip
       date = Date.parse(tds[1].text).iso8601 if date.length > 4
       [
         tds[0].text.strip, {
           start_date: date,
-          party: tds[3].text.split('[').first,
-        }
+          party:      tds[3].text.split('[').first,
+        },
       ]
-    }
+    end
   ]
 
   # Find a table with a 'Constituency' column
@@ -136,14 +137,14 @@ end
   table.xpath('tr[td]').each do |member|
     tds = member.xpath('td')
     data = {
-      name: tds[0].css('a').first.text.strip,
-      wikipedia: tds[0].xpath('a[not(@class="new")]/@title').text.strip,
-      party: tds[1].xpath('a').text.strip,
+      name:         tds[0].css('a').first.text.strip,
+      wikipedia:    tds[0].xpath('a[not(@class="new")]/@title').text.strip,
+      party:        tds[1].xpath('a').text.strip,
       constituency: tds[2].text.gsub(/[[:space:]]/, ' ').strip,
-      source: url,
-      term: term,
-      start_date: nil,
-      end_date: nil,
+      source:       url,
+      term:         term,
+      start_date:   nil,
+      end_date:     nil,
     }
 
     # If we had a record in the "Changes" table:
@@ -153,15 +154,13 @@ end
     end
 
     # If there are any reference notes on the Membership:
-    if not (ref = tds[0].css('sup.reference a @href').text).empty?
+    unless (ref = tds[0].css('sup.reference a @href').text).empty?
       note = notes[ref].css('span.reference-text')
 
       # Replaced by someone else
-      if replaced = note.children.each_slice(3).find { |t,_,_| t.text.include? 'Replaced by' }
-        replacement = data.merge({
-          name: replaced[1].text.strip,
-          wikipedia: wikilink(replaced[1]),
-        })
+      if replaced = note.children.each_slice(3).find { |t, _, _| t.text.include? 'Replaced by' }
+        replacement = data.merge(name:      replaced[1].text.strip,
+                                 wikipedia: wikilink(replaced[1]))
 
         if change_date = note.text[/on (\d+ \w+ \d+)/, 1]
           pdate = Date.parse(change_date) or raise "Can't parse #{pdate}"
@@ -173,7 +172,7 @@ end
         end
 
       # Changed party
-      elsif switch = note.children.each_slice(3).find { |t,_,_| t.text.include? 'Became' }
+      elsif switch = note.children.each_slice(3).find { |t, _, _| t.text.include? 'Became' }
         if note.text.include? 'Became Prime Minister'
           # Ignore this for now
         elsif switch[0].text.include? 'Became independent'
@@ -187,7 +186,7 @@ end
         end
 
         if new_party
-          replacement = data.merge({ party: new_party })
+          replacement = data.merge(party: new_party)
           if change_year = change_date_str[/in (\d{4})/, 1]
             replacement[:start_date] = data[:end_date] = change_year
           else
@@ -200,9 +199,8 @@ end
     end
 
     count += 1
-    ScraperWiki.save_sqlite([:name, :term], data)
-    (ScraperWiki.save_sqlite([:name, :term], replacement) && count+=1) if replacement
+    ScraperWiki.save_sqlite(%i(name term), data)
+    (ScraperWiki.save_sqlite(%i(name term), replacement) && count += 1) if replacement
   end
   puts "#{term}: #{count}"
 end
-
