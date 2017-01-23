@@ -86,6 +86,10 @@ new_format_terms = {
   '2013' => 'https://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland,_2013%E2%80%9316',
 }
 
+old_revisions = {
+  '2013' => 'https://en.wikipedia.org/w/index.php?title=Template:MembersAlthing2013&direction=prev&oldid=714280236',
+}
+
 def scrape_new_format_terms(terms)
   terms.each do |term, url|
     page = MembersPageWithAreaTable.new(response: Scraped::Request.new(url: url).response)
@@ -97,6 +101,8 @@ def scrape_new_format_terms(terms)
 end
 
 scrape_new_format_terms(new_format_terms)
+scrape_new_format_terms(old_revisions)
+
 # ----------
 # Old layout
 # ----------
