@@ -86,14 +86,17 @@ new_format_terms = {
   '2013' => 'https://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland,_2013%E2%80%9316',
 }
 
-new_format_terms.each do |term, url|
-  page = MembersPageWithAreaTable.new(response: Scraped::Request.new(url: url).response)
-  members = page.members.each { |m| m[:term] = term }
-  # puts members
-  puts "#{term}: #{members.count}"
-  ScraperWiki.save_sqlite(%i(name term), members)
+def scrape_new_format_terms(terms)
+  terms.each do |term, url|
+    page = MembersPageWithAreaTable.new(response: Scraped::Request.new(url: url).response)
+    members = page.members.each { |m| m[:term] = term }
+    # puts members
+    puts "#{term}: #{members.count}"
+    ScraperWiki.save_sqlite(%i(name term), members)
+  end
 end
 
+scrape_new_format_terms(new_format_terms)
 # ----------
 # Old layout
 # ----------
