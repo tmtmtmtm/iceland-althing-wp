@@ -82,8 +82,8 @@ ScraperWiki.sqliteexecute('DELETE FROM data') rescue nil
 # ----------
 
 new_format_terms = {
-  '2016' => 'https://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland',
-  '2013' => 'https://en.wikipedia.org/wiki/List_of_members_of_the_parliament_of_Iceland,_2013%E2%80%9316',
+  '2016' => 'https://en.wikipedia.org/wiki/Template:MembersAlthing2016',
+  '2013' => 'https://en.wikipedia.org/wiki/Template:MembersAlthing2013',
 }
 
 old_revisions = {
