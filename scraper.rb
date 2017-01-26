@@ -13,6 +13,11 @@ def noko(url)
   Nokogiri::HTML(open(url).read)
 end
 
+def scrape(h)
+  url, klass = h.to_a.first
+  klass.new(response: Scraped::Request.new(url: url).response)
+end
+
 class Party
   PARTIES = {
     'D' => 'Independence Party',
@@ -81,18 +86,27 @@ ScraperWiki.sqliteexecute('DELETE FROM data') rescue nil
 # New layout
 # ----------
 
-new_format_terms = {
+new_terms = {
   '2016' => 'https://en.wikipedia.org/wiki/Template:MembersAlthing2016',
   '2013' => 'https://en.wikipedia.org/wiki/Template:MembersAlthing2013',
 }
 
-new_format_terms.each do |term, url|
-  page = MembersPageWithAreaTable.new(response: Scraped::Request.new(url: url).response)
-  members = page.members.each { |m| m[:term] = term }
-  # puts members
-  puts "#{term}: #{members.count}"
-  ScraperWiki.save_sqlite(%i(name term), members)
+old_revisions = {
+  '2013' => 'https://en.wikipedia.org/w/index.php?title=Template:MembersAlthing2013&direction=prev&oldid=714280236',
+}
+
+def scrape_new_format_terms(*term_hashes)
+  term_hashes.each do |term_hash|
+    term_hash.each do |term, url|
+      members = (scrape url => MembersPageWithAreaTable).members.each do |m|
+        ScraperWiki.save_sqlite(%i(name term), m.merge(term: term))
+      end
+      puts "#{term}: #{members.count}"
+    end
+  end
 end
+
+scrape_new_format_terms(new_terms, old_revisions)
 
 # ----------
 # Old layout
