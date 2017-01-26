@@ -86,27 +86,21 @@ ScraperWiki.sqliteexecute('DELETE FROM data') rescue nil
 # New layout
 # ----------
 
-new_terms = {
-  '2016' => 'https://en.wikipedia.org/wiki/Template:MembersAlthing2016',
-  '2013' => 'https://en.wikipedia.org/wiki/Template:MembersAlthing2013',
-}
+urls = [
+  'https://en.wikipedia.org/wiki/Template:MembersAlthing2016',
+  'https://en.wikipedia.org/wiki/Template:MembersAlthing2013',
+  'https://en.wikipedia.org/w/index.php?title=Template:MembersAlthing2013&direction=prev&oldid=714280236',
+]
 
-old_revisions = {
-  '2013' => 'https://en.wikipedia.org/w/index.php?title=Template:MembersAlthing2013&direction=prev&oldid=714280236',
-}
-
-def scrape_new_format_terms(*term_hashes)
-  term_hashes.each do |term_hash|
-    term_hash.each do |term, url|
-      members = (scrape url => MembersPageWithAreaTable).members.each do |m|
-        ScraperWiki.save_sqlite(%i(name term), m.merge(term: term))
-      end
-      puts "#{term}: #{members.count}"
+def scrape_new_format_terms(urls)
+  urls.each do |url|
+    (scrape url => MembersPageWithAreaTable).members.each do |m|
+      ScraperWiki.save_sqlite(%i(name term), m.to_h)
     end
   end
 end
 
-scrape_new_format_terms(new_terms, old_revisions)
+scrape_new_format_terms(urls)
 
 # ----------
 # Old layout
