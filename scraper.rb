@@ -86,13 +86,22 @@ new_format_terms = {
   '2013' => 'https://en.wikipedia.org/wiki/Template:MembersAlthing2013',
 }
 
-new_format_terms.each do |term, url|
-  page = MembersPageWithAreaTable.new(response: Scraped::Request.new(url: url).response)
-  members = page.members.each { |m| m[:term] = term }
-  # puts members
-  puts "#{term}: #{members.count}"
-  ScraperWiki.save_sqlite(%i(name term), members)
+old_revisions = {
+  '2013' => 'https://en.wikipedia.org/w/index.php?title=Template:MembersAlthing2013&direction=prev&oldid=714280236',
+}
+
+def scrape_new_format_terms(terms)
+  terms.each do |term, url|
+    page = MembersPageWithAreaTable.new(response: Scraped::Request.new(url: url).response)
+    members = page.members.each { |m| m[:term] = term }
+    # puts members
+    puts "#{term}: #{members.count}"
+    ScraperWiki.save_sqlite(%i(name term), members)
+  end
 end
+
+scrape_new_format_terms(new_format_terms)
+scrape_new_format_terms(old_revisions)
 
 # ----------
 # Old layout
