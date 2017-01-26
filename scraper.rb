@@ -60,7 +60,7 @@ class MembersPageWithAreaTable < Scraped::HTML
           wikipedia:    wikilink(p),
           constituency: constituencies[i],
           party:        Party.new(p.xpath('./following-sibling::text()').first.text).name,
-          term:         nil, # splice in later
+          term:         url[-4..-1],
           start_date:   nil,
           end_date:     nil,
         }
