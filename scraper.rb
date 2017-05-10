@@ -75,7 +75,7 @@ class MembersPageWithAreaTable < Scraped::HTML
 end
 
 # Clean out old data and start fresh each time
-ScraperWiki.sqliteexecute('DELETE FROM data') rescue nil
+ScraperWiki.sqliteexecute('DROP TABLE data') rescue nil
 
 # ----------
 # New layout
