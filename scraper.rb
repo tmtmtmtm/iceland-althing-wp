@@ -48,7 +48,7 @@ end
 
 class MembersPageWithAreaTable < Scraped::HTML
   field :members do
-    table.xpath('tr[td]').first.xpath('td').each_with_index.map do |td, i|
+    table.xpath('.//tr[td]').first.xpath('td').each_with_index.map do |td, i|
       td.xpath('.//a').map do |p|
         {
           name:         p.text.strip,
@@ -134,7 +134,7 @@ end
 
   # Find a table with a 'Constituency' column
   table = page.at_xpath('//table[.//th[text()[contains(.,"Constituency")]]]')
-  table.xpath('tr[td]').each do |member|
+  table.xpath('.//tr[td]').each do |member|
     tds = member.xpath('td')
     data = {
       name:         tds[0].css('a').first.text.strip,
