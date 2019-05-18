@@ -13,6 +13,11 @@ def noko(url)
   Nokogiri::HTML(open(url).read)
 end
 
+def scrape(h)
+  url, klass = h.to_a.first
+  klass.new(response: Scraped::Request.new(url: url).response)
+end
+
 class Party
   PARTIES = {
     'D' => 'Independence Party',
@@ -55,7 +60,7 @@ class MembersPageWithAreaTable < Scraped::HTML
           wikipedia:    wikilink(p),
           constituency: constituencies[i],
           party:        Party.new(p.xpath('./following-sibling::text()').first.text).name,
-          term:         nil, # splice in later
+          term:         url.split('&').first[-4..-1],
           start_date:   nil,
           end_date:     nil,
         }
@@ -81,18 +86,21 @@ ScraperWiki.sqliteexecute('DROP TABLE data') rescue nil
 # New layout
 # ----------
 
-new_format_terms = {
-  '2016' => 'https://en.wikipedia.org/wiki/Template:MembersAlthing2016',
-  '2013' => 'https://en.wikipedia.org/wiki/Template:MembersAlthing2013',
-}
+urls = [
+  'https://en.wikipedia.org/wiki/Template:MembersAlthing2016',
+  'https://en.wikipedia.org/wiki/Template:MembersAlthing2013',
+  'https://en.wikipedia.org/w/index.php?title=Template:MembersAlthing2013&direction=prev&oldid=714280236',
+]
 
-new_format_terms.each do |term, url|
-  page = MembersPageWithAreaTable.new(response: Scraped::Request.new(url: url).response)
-  members = page.members.each { |m| m[:term] = term }
-  # puts members
-  puts "#{term}: #{members.count}"
-  ScraperWiki.save_sqlite(%i(name term), members)
+def scrape_new_format_terms(urls)
+  urls.each do |url|
+    (scrape url => MembersPageWithAreaTable).members.each do |m|
+      ScraperWiki.save_sqlite(%i(name term), m.to_h)
+    end
+  end
 end
+
+scrape_new_format_terms(urls)
 
 # ----------
 # Old layout
@@ -202,5 +210,4 @@ end
     ScraperWiki.save_sqlite(%i(name term), data)
     (ScraperWiki.save_sqlite(%i(name term), replacement) && count += 1) if replacement
   end
-  puts "#{term}: #{count}"
 end
